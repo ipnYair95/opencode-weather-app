@@ -1,4 +1,5 @@
 import * as readline from "node:readline";
+import { cyan, yellow, green, red, reset, colorize } from "./colors.ts";
 import type { City, Config } from "./types.ts";
 import { searchCity, getWeather } from "./api.ts";
 import { saveConfig } from "./storage.ts";
@@ -16,7 +17,7 @@ async function ask(query: string): Promise<string> {
 }
 
 function menuLine(): string {
-  return "  " + "═".repeat(38);
+  return colorize("  " + "═".repeat(38), cyan);
 }
 
 function printMenu(config: Config): void {
@@ -27,24 +28,24 @@ function printMenu(config: Config): void {
   const cityCount = config.cities.length;
 
   console.log(`\n${menuLine()}`);
-  console.log("  " + " ".repeat(12) + "WEATHER CLI");
+  console.log(colorize("  " + " ".repeat(12) + "WEATHER CLI", cyan));
   console.log(`${menuLine()}`);
-  console.log(`   1. ${defaultLabel}`);
-  console.log(`   2. Clima de todas las ciudades (${cityCount})`);
-  console.log(`   3. Buscar y agregar ciudad`);
-  console.log(`   4. Eliminar ciudad`);
-  console.log(`   5. Establecer ciudad default`);
-  console.log(`   8. ${unitLabel}`);
-  console.log(`   9. Salir`);
+  console.log(colorize(`   1. ${defaultLabel}`, cyan));
+  console.log(colorize(`   2. Clima de todas las ciudades (${cityCount})`, cyan));
+  console.log(colorize(`   3. Buscar y agregar ciudad`, cyan));
+  console.log(colorize(`   4. Eliminar ciudad`, cyan));
+  console.log(colorize(`   5. Establecer ciudad default`, cyan));
+  console.log(colorize(`   8. ${unitLabel}`, cyan));
+  console.log(colorize(`   9. Salir`, cyan));
   console.log(`${menuLine()}`);
 }
 
 async function showWeather(city: City, unit: "C" | "F"): Promise<void> {
   const weather = await getWeather(city, unit);
   if (weather === null) {
-    console.log(`\n  ✗ Error al obtener el clima de ${city.name}`);
+    console.log(`\n  ${red}✗${reset} Error al obtener el clima de ${city.name}`);
   } else {
-    console.log(`\n  📍 ${city.name}: ${weather.temperature}${weather.unit}`);
+    console.log(`\n  📍 ${city.name}: ${yellow}${weather.temperature}${weather.unit}${reset}`);
   }
 }
 
