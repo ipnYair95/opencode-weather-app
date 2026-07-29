@@ -1,7 +1,7 @@
 import * as readline from "node:readline";
 import { cyan, yellow, green, red, reset, colorize } from "./colors.ts";
 import type { City, Config } from "./types.ts";
-import { searchCity, getWeather } from "./api.ts";
+import { searchCity, getWeather, getWeeklyForecast, weatherDescription } from "./api.ts";
 import { saveConfig } from "./storage.ts";
 
 const rl = readline.createInterface({
@@ -35,6 +35,7 @@ function printMenu(config: Config): void {
   console.log(colorize(`   3. Buscar y agregar ciudad`, cyan));
   console.log(colorize(`   4. Eliminar ciudad`, cyan));
   console.log(colorize(`   5. Establecer ciudad default`, cyan));
+  console.log(colorize(`   6. Pronóstico 7 días de todas las ciudades`, cyan));
   console.log(colorize(`   8. ${unitLabel}`, cyan));
   console.log(colorize(`   9. Salir`, cyan));
   console.log(`${menuLine()}`);
@@ -64,6 +65,29 @@ async function handleAllCities(config: Config): Promise<void> {
   }
   for (const city of config.cities) {
     await showWeather(city, config.unit);
+  }
+}
+
+async function handleAllCitiesForecast(config: Config): Promise<void> {
+  if (config.cities.length === 0) {
+    console.log("\n  No hay ciudades guardadas.");
+    return;
+  }
+
+  for (const city of config.cities) {
+    const forecast = await getWeeklyForecast(city, config.unit);
+    if (forecast === null) {
+      console.log(`\n  ${red}✗${reset} Error al obtener pronóstico de ${city.name}`);
+      continue;
+    }
+
+    console.log(`\n  📍 ${city.name}`);
+    console.log(`  ${"─".repeat(40)}`);
+    for (const day of forecast) {
+      const dayName = new Intl.DateTimeFormat("es", { weekday: "short" }).format(day.date);
+      const dateStr = new Intl.DateTimeFormat("es", { day: "2-digit", month: "2-digit" }).format(day.date);
+      console.log(`  📅 ${dayName} ${dateStr}  ${weatherDescription(day.weatherCode)}  ${yellow}${day.tempMax}º${reset} / ${day.tempMin}º`);
+    }
   }
 }
 
@@ -194,6 +218,9 @@ export async function startMenu(config: Config): Promise<void> {
         break;
       case "5":
         await handleSetDefault(config);
+        break;
+      case "6":
+        await handleAllCitiesForecast(config);
         break;
       case "8":
         await handleToggleUnit(config);
