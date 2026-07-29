@@ -1,7 +1,10 @@
+import { join } from "path";
 import type { Config } from "../types/City.ts";
 
 function configPath(): string {
-  return `${process.env.HOME}/.weather-cli.json`;
+  const home = process.env.HOME || process.env.USERPROFILE;
+  if (!home) throw new Error("Cannot determine home directory");
+  return join(home, ".weather-cli.json");
 }
 
 function defaultConfig(): Config {
