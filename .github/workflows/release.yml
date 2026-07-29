@@ -21,8 +21,6 @@ jobs:
             suffix: linux
           - os: macos-latest
             suffix: darwin
-          - os: windows-latest
-            suffix: win.exe
     runs-on: ${{ matrix.os }}
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -44,13 +42,7 @@ jobs:
 
       - run: bun run build
 
-      - name: Rename binary
-        run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            mv weather.exe weather-${{ matrix.suffix }}
-          else
-            mv weather weather-${{ matrix.suffix }}
-          fi
+      - run: mv weather weather-${{ matrix.suffix }}
         shell: bash
 
       - uses: actions/upload-artifact@v4
@@ -89,4 +81,3 @@ jobs:
           files: |
             weather-linux
             weather-darwin
-            weather-win.exe
