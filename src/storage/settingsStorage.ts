@@ -1,11 +1,11 @@
 import { readFile, writeFile } from "fs/promises";
+import { homedir } from "os";
 import { join } from "path";
 import type { Config } from "../types/City.ts";
 
 function configPath(): string {
-  const home = process.env.HOME || process.env.USERPROFILE;
-  if (!home) throw new Error("Cannot determine home directory");
-  return join(home, ".weather-cli.json");
+  const dir = process.env.WEATHER_CLI_CONFIG_DIR ?? homedir();
+  return join(dir, ".weather-cli.json");
 }
 
 function defaultConfig(): Config {

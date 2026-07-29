@@ -28,13 +28,13 @@ export function askSequence(answers: string[]) {
 
 export function withTempHome(): { tmpHome: string; cleanup: () => void } {
   const tmpHome = mkdtempSync(join(tmpdir(), "weather-test-"));
-  const originalHome = process.env.HOME;
-  process.env.HOME = tmpHome;
+  const originalDir = process.env.WEATHER_CLI_CONFIG_DIR;
+  process.env.WEATHER_CLI_CONFIG_DIR = tmpHome;
   return {
     tmpHome,
     cleanup: () => {
       rmSync(tmpHome, { recursive: true, force: true });
-      process.env.HOME = originalHome;
+      process.env.WEATHER_CLI_CONFIG_DIR = originalDir;
     },
   };
 }

@@ -8,17 +8,17 @@ const { loadConfig, saveConfig, loadUnit, saveUnit } = await import("../../src/s
 
 describe("settingsStorage", () => {
   let tmpHome: string;
-  let origHome: string | undefined;
+  let origDir: string | undefined;
 
   beforeEach(() => {
     tmpHome = mkdtempSync(join(tmpdir(), "weather-test-"));
-    origHome = process.env.HOME;
-    process.env.HOME = tmpHome;
+    origDir = process.env.WEATHER_CLI_CONFIG_DIR;
+    process.env.WEATHER_CLI_CONFIG_DIR = tmpHome;
   });
 
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true });
-    process.env.HOME = origHome;
+    process.env.WEATHER_CLI_CONFIG_DIR = origDir;
   });
 
   it("loadConfig returns default when file does not exist", async () => {

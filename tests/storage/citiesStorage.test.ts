@@ -7,17 +7,17 @@ const { loadCities, saveCities, getDefaultCity, setDefaultCity } = await import(
 
 describe("citiesStorage", () => {
   let tmpHome: string;
-  let origHome: string | undefined;
+  let origDir: string | undefined;
 
   beforeEach(() => {
     tmpHome = mkdtempSync(join(tmpdir(), "weather-test-"));
-    origHome = process.env.HOME;
-    process.env.HOME = tmpHome;
+    origDir = process.env.WEATHER_CLI_CONFIG_DIR;
+    process.env.WEATHER_CLI_CONFIG_DIR = tmpHome;
   });
 
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true });
-    process.env.HOME = origHome;
+    process.env.WEATHER_CLI_CONFIG_DIR = origDir;
   });
 
   it("loadCities returns empty array by default", async () => {
