@@ -1,3 +1,4 @@
+import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import type { Config } from "../types/City.ts";
 
@@ -17,11 +18,7 @@ function defaultConfig(): Config {
 
 export async function loadConfig(): Promise<Config> {
   try {
-    const file = Bun.file(configPath());
-    const exists = await file.exists();
-    if (!exists) return defaultConfig();
-
-    const text = await file.text();
+    const text = await readFile(configPath(), "utf-8");
     return JSON.parse(text) as Config;
   } catch {
     return defaultConfig();
@@ -30,7 +27,7 @@ export async function loadConfig(): Promise<Config> {
 
 export async function saveConfig(config: Config): Promise<void> {
   try {
-    await Bun.write(configPath(), JSON.stringify(config, null, 2));
+    await writeFile(configPath(), JSON.stringify(config, null, 2), "utf-8");
   } catch (error) {
     console.error("Error al guardar la configuración:", error);
   }
