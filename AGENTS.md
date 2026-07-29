@@ -1,12 +1,12 @@
 # AGENTS.md
 
-Weather CLI (planned). Current state: `bun init` scaffold (`index.ts` prints "Hello via Bun!").
+Weather CLI.
 
 ## Runtime: Bun, not Node
 
 Use `bun` for everything — no `node`, `npm`, `pnpm`, `yarn`, `dotenv`, or `ts-node`.
 
-- Run: `bun run index.ts`
+- Run: `bun run src/index.ts`
 - Install: `bun install`
 - Add package: `bun add <pkg>`
 - Execute: `bunx <pkg>`

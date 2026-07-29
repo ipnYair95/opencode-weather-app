@@ -1,6 +1,14 @@
-import type { Config } from "./types.ts";
+import type { Config } from "../types/City.ts";
 
 const CONFIG_PATH = `${process.env.HOME}/.weather-cli.json`;
+
+function defaultConfig(): Config {
+  return {
+    defaultCity: null,
+    cities: [],
+    unit: "C",
+  };
+}
 
 export async function loadConfig(): Promise<Config> {
   try {
@@ -23,10 +31,13 @@ export async function saveConfig(config: Config): Promise<void> {
   }
 }
 
-function defaultConfig(): Config {
-  return {
-    defaultCity: null,
-    cities: [],
-    unit: "C",
-  };
+export async function loadUnit(): Promise<"C" | "F"> {
+  const config = await loadConfig();
+  return config.unit;
+}
+
+export async function saveUnit(unit: "C" | "F"): Promise<void> {
+  const config = await loadConfig();
+  config.unit = unit;
+  await saveConfig(config);
 }
