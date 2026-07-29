@@ -3,20 +3,25 @@ import { mkdtempSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 
-const { setConfigDir } = await import("../../src/storage/settingsStorage.ts");
 const { loadCities, saveCities, getDefaultCity, setDefaultCity } = await import("../../src/storage/citiesStorage.ts");
 
+function tmpHome(): string {
+  return mkdtempSync(join(tmpdir(), "weather-test-")).replace(/\\/g, "/");
+}
+
 describe("citiesStorage", () => {
-  let tmpHome: string;
+  let tmpDir: string;
+  let origDir: string | undefined;
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), "weather-test-"));
-    setConfigDir(tmpHome);
+    tmpDir = tmpHome();
+    origDir = process.env.WEATHER_CLI_CONFIG_DIR;
+    process.env.WEATHER_CLI_CONFIG_DIR = tmpDir;
   });
 
   afterEach(() => {
-    rmSync(tmpHome, { recursive: true, force: true });
-    setConfigDir(undefined);
+    rmSync(tmpDir, { recursive: true, force: true });
+    process.env.WEATHER_CLI_CONFIG_DIR = origDir;
   });
 
   it("loadCities returns empty array by default", async () => {

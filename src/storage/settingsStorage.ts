@@ -1,17 +1,10 @@
-import { readFile, writeFile } from "fs/promises";
-import { homedir } from "os";
-import { join } from "path";
 import type { Config } from "../types/City.ts";
 
-export let _configDir: string | undefined;
-
-export function setConfigDir(dir: string | undefined): void {
-  _configDir = dir;
-}
-
 function configPath(): string {
-  const dir = _configDir ?? homedir();
-  return join(dir, ".weather-cli.json");
+  const home = process.env.WEATHER_CLI_CONFIG_DIR
+    ?? process.env.HOME
+    ?? process.env.USERPROFILE;
+  return `${home}/.weather-cli.json`;
 }
 
 function defaultConfig(): Config {
@@ -24,7 +17,11 @@ function defaultConfig(): Config {
 
 export async function loadConfig(): Promise<Config> {
   try {
-    const text = await readFile(configPath(), "utf-8");
+    const file = Bun.file(configPath());
+    const exists = await file.exists();
+    if (!exists) return defaultConfig();
+
+    const text = await file.text();
     return JSON.parse(text) as Config;
   } catch {
     return defaultConfig();
@@ -33,7 +30,7 @@ export async function loadConfig(): Promise<Config> {
 
 export async function saveConfig(config: Config): Promise<void> {
   try {
-    await writeFile(configPath(), JSON.stringify(config, null, 2), "utf-8");
+    await Bun.write(configPath(), JSON.stringify(config, null, 2));
   } catch (error) {
     console.error("Error al guardar la configuración:", error);
   }

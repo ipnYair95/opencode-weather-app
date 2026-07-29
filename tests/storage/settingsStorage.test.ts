@@ -4,19 +4,25 @@ import { join } from "path";
 import { tmpdir } from "os";
 import type { Config } from "../../src/types/City.ts";
 
-const { loadConfig, saveConfig, loadUnit, saveUnit, setConfigDir } = await import("../../src/storage/settingsStorage.ts");
+const { loadConfig, saveConfig, loadUnit, saveUnit } = await import("../../src/storage/settingsStorage.ts");
+
+function tmpHome(): string {
+  return mkdtempSync(join(tmpdir(), "weather-test-")).replace(/\\/g, "/");
+}
 
 describe("settingsStorage", () => {
-  let tmpHome: string;
+  let tmpDir: string;
+  let origDir: string | undefined;
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), "weather-test-"));
-    setConfigDir(tmpHome);
+    tmpDir = tmpHome();
+    origDir = process.env.WEATHER_CLI_CONFIG_DIR;
+    process.env.WEATHER_CLI_CONFIG_DIR = tmpDir;
   });
 
   afterEach(() => {
-    rmSync(tmpHome, { recursive: true, force: true });
-    setConfigDir(undefined);
+    rmSync(tmpDir, { recursive: true, force: true });
+    process.env.WEATHER_CLI_CONFIG_DIR = origDir;
   });
 
   it("loadConfig returns default when file does not exist", async () => {
@@ -32,7 +38,7 @@ describe("settingsStorage", () => {
       cities: [],
       unit: "F",
     };
-    writeFileSync(join(tmpHome, ".weather-cli.json"), JSON.stringify(data));
+    writeFileSync(`${tmpDir}/.weather-cli.json`, JSON.stringify(data));
     const config = await loadConfig();
     expect(config.defaultCity?.name).toBe("Ottawa");
     expect(config.unit).toBe("F");
@@ -45,7 +51,7 @@ describe("settingsStorage", () => {
       unit: "C",
     };
     await saveConfig(config);
-    const filePath = join(tmpHome, ".weather-cli.json");
+    const filePath = `${tmpDir}/.weather-cli.json`;
     expect(existsSync(filePath)).toBe(true);
     const saved = JSON.parse(readFileSync(filePath, "utf-8"));
     expect(saved.cities).toHaveLength(1);
