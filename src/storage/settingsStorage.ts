@@ -1,10 +1,11 @@
 import type { Config } from "../types/City.ts";
 
 function configPath(): string {
-  const home = process.env.WEATHER_CLI_CONFIG_DIR
+  const dir = (globalThis as { __WEATHER_CLI_DIR?: string }).__WEATHER_CLI_DIR
+    ?? process.env.WEATHER_CLI_CONFIG_DIR
     ?? process.env.HOME
     ?? process.env.USERPROFILE;
-  return `${home}/.weather-cli.json`;
+  return `${dir}/.weather-cli.json`;
 }
 
 function defaultConfig(): Config {

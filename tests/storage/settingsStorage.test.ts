@@ -16,13 +16,13 @@ describe("settingsStorage", () => {
 
   beforeEach(() => {
     tmpDir = tmpHome();
-    origDir = process.env.WEATHER_CLI_CONFIG_DIR;
-    process.env.WEATHER_CLI_CONFIG_DIR = tmpDir;
+    origDir = (globalThis as { __WEATHER_CLI_DIR?: string }).__WEATHER_CLI_DIR;
+    (globalThis as { __WEATHER_CLI_DIR?: string }).__WEATHER_CLI_DIR = tmpDir;
   });
 
   afterEach(() => {
     rmSync(tmpDir, { recursive: true, force: true });
-    process.env.WEATHER_CLI_CONFIG_DIR = origDir;
+    (globalThis as { __WEATHER_CLI_DIR?: string }).__WEATHER_CLI_DIR = origDir;
   });
 
   it("loadConfig returns default when file does not exist", async () => {
