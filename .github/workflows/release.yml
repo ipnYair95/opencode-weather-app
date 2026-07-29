@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            suffix: linux
+          - os: macos-latest
+            suffix: darwin
+          - os: windows-latest
+            suffix: win.exe
+    runs-on: ${{ matrix.os }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - run: bun run build
+
+      - name: Rename binary
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            mv weather.exe weather-${{ matrix.suffix }}
+          else
+            mv weather weather-${{ matrix.suffix }}
+          fi
+        shell: bash
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weather-${{ matrix.suffix }}
+          path: weather-${{ matrix.suffix }}
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: weather-*
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            weather-linux
+            weather-darwin
+            weather-win.exe
