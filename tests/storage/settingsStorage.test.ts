@@ -4,21 +4,19 @@ import { join } from "path";
 import { tmpdir } from "os";
 import type { Config } from "../../src/types/City.ts";
 
-const { loadConfig, saveConfig, loadUnit, saveUnit } = await import("../../src/storage/settingsStorage.ts");
+const { loadConfig, saveConfig, loadUnit, saveUnit, setConfigDir } = await import("../../src/storage/settingsStorage.ts");
 
 describe("settingsStorage", () => {
   let tmpHome: string;
-  let origDir: string | undefined;
 
   beforeEach(() => {
     tmpHome = mkdtempSync(join(tmpdir(), "weather-test-"));
-    origDir = process.env.WEATHER_CLI_CONFIG_DIR;
-    process.env.WEATHER_CLI_CONFIG_DIR = tmpHome;
+    setConfigDir(tmpHome);
   });
 
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true });
-    process.env.WEATHER_CLI_CONFIG_DIR = origDir;
+    setConfigDir(undefined);
   });
 
   it("loadConfig returns default when file does not exist", async () => {

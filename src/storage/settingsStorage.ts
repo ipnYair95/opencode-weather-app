@@ -3,8 +3,14 @@ import { homedir } from "os";
 import { join } from "path";
 import type { Config } from "../types/City.ts";
 
+export let _configDir: string | undefined;
+
+export function setConfigDir(dir: string | undefined): void {
+  _configDir = dir;
+}
+
 function configPath(): string {
-  const dir = process.env.WEATHER_CLI_CONFIG_DIR ?? homedir();
+  const dir = _configDir ?? homedir();
   return join(dir, ".weather-cli.json");
 }
 
